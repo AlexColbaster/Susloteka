@@ -93,18 +93,20 @@
   <div class="reviews-list">
     {% for review in film.reviews.all %}
       <article class="review-item">
-        <div class="review-meta">
-          <strong>{{ review.author }}</strong>
-          <span>{{ review.rating }}/10</span>
+        <div class="review-item-top">
+          <div class="review-meta">
+            <strong>{{ review.author }}</strong>
+            <span>{{ review.rating }}/10</span>
+          </div>
+          {% if can_moderate_reviews %}
+            <form action="{% url 'review_delete' review.pk %}" method="post" class="inline-form review-actions">
+              {% csrf_token %}
+              <button class="button button-danger review-delete" type="submit">Удалить</button>
+            </form>
+          {% endif %}
         </div>
         <p>{{ review.text }}</p>
         <small>{{ review.created_at|date:"d.m.Y H:i" }}</small>
-        {% if can_moderate_reviews %}
-          <form action="{% url 'review_delete' review.pk %}" method="post" class="inline-form review-actions">
-            {% csrf_token %}
-            <button class="button button-danger" type="submit">Удалить</button>
-          </form>
-        {% endif %}
       </article>
     {% empty %}
       <p class="empty-copy">Пока нет отзывов. Будьте первым.</p>
