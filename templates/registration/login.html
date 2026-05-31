@@ -1,0 +1,24 @@
+{% extends 'films/base.html' %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<section class="card auth-card">
+  <p class="eyebrow">Аккаунт</p>
+  <h1>Вход на сайт</h1>
+  <form method="post" class="form-stack auth-form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <label>
+      <span>Логин</span>
+      {{ form.username }}
+    </label>
+    <label>
+      <span>Пароль</span>
+      {{ form.password }}
+    </label>
+    <button class="button button-primary" type="submit">Войти</button>
+  </form>
+  <p class="auth-note">Нет аккаунта? <a href="{% url 'register' %}">Зарегистрируйтесь</a></p>
+</section>
+{% endblock %}

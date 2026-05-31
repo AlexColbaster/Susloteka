@@ -1,0 +1,41 @@
+{% extends 'films/base.html' %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<section class="card auth-card">
+  <p class="eyebrow">Новый аккаунт</p>
+  <h1>Регистрация</h1>
+  <form method="post" class="form-stack auth-form">
+    {% csrf_token %}
+    {% if form.errors %}
+      <div class="form-errors">
+        {{ form.non_field_errors }}
+        {{ form.username.errors }}
+        {{ form.role.errors }}
+        {{ form.password1.errors }}
+        {{ form.password2.errors }}
+      </div>
+    {% endif %}
+    <label>
+      <span>Логин</span>
+      {{ form.username }}
+    </label>
+    <label>
+      <span>Кто вы</span>
+      <div class="role-grid">
+        {{ form.role }}
+      </div>
+    </label>
+    <label>
+      <span>Пароль</span>
+      {{ form.password1 }}
+    </label>
+    <label>
+      <span>Повтор пароля</span>
+      {{ form.password2 }}
+    </label>
+    <button class="button button-primary" type="submit">Создать аккаунт</button>
+  </form>
+</section>
+{% endblock %}

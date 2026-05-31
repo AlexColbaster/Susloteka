@@ -11,6 +11,10 @@
     </div>
   </div>
 
+  {% if not is_librarian %}
+    <p class="empty-copy">Доступно только библиотекарю.</p>
+  {% endif %}
+
   <form method="post" enctype="multipart/form-data" class="form-stack form-grid">
     {% csrf_token %}
     {{ form.non_field_errors }}

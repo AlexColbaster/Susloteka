@@ -16,7 +16,19 @@
       </a>
       <nav class="topnav">
         <a href="{% url 'film_list' %}">Каталог</a>
-        <a class="button button-primary" href="{% url 'film_create' %}">Добавить фильм</a>
+        {% if is_librarian %}
+          <a class="button button-primary" href="{% url 'film_create' %}">Добавить фильм</a>
+        {% endif %}
+        {% if user.is_authenticated %}
+          <a href="{% url 'profile' %}">Профиль</a>
+          <form action="{% url 'logout' %}" method="post" class="inline-form">
+            {% csrf_token %}
+            <button class="button button-ghost" type="submit">Выйти</button>
+          </form>
+        {% else %}
+          <a href="{% url 'login' %}">Войти</a>
+          <a class="button button-primary" href="{% url 'register' %}">Регистрация</a>
+        {% endif %}
       </nav>
     </header>
 
