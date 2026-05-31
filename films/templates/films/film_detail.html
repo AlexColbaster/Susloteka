@@ -1,4 +1,5 @@
 {% extends 'films/base.html' %}
+{% load static %}
 
 {% block title %}{{ film.title }}{% endblock %}
 
@@ -34,10 +35,27 @@
         </div>
         <span class="video-badge">HD playback</span>
       </div>
-      <video controls preload="metadata">
-        <source src="{{ film.video.url }}">
-        Ваш браузер не поддерживает воспроизведение видео.
-      </video>
+      <div class="video-stage">
+        <video id="film-video" preload="metadata" playsinline>
+          <source src="{{ film.video.url }}">
+          Ваш браузер не поддерживает воспроизведение видео.
+        </video>
+        <button class="video-overlay" type="button" data-video-play>
+          <span>Смотреть</span>
+        </button>
+      </div>
+      <div class="video-controls">
+        <button class="video-control video-control-icon" type="button" data-video-toggle aria-label="Воспроизвести или поставить на паузу">
+          <span data-video-toggle-icon>▶</span>
+        </button>
+        <button class="video-control video-control-icon" type="button" data-video-fullscreen aria-label="Полноэкранный режим">
+          <span data-video-fullscreen-icon>⛶</span>
+        </button>
+        <div class="video-progress-wrap">
+          <input class="video-progress" type="range" min="0" max="1000" value="0" step="1" data-video-progress>
+        </div>
+        <span class="video-time" data-video-time>0:00 / 0:00</span>
+      </div>
     </div>
   </article>
 
@@ -93,4 +111,8 @@
     {% endfor %}
   </div>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{% static 'films/player.js' %}" defer></script>
 {% endblock %}
