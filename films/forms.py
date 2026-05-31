@@ -28,13 +28,6 @@ class ReviewForm(forms.ModelForm):
 
 
 class RegistrationForm(UserCreationForm):
-    ROLE_CHOICES = [
-        ('client', 'Клиент'),
-        ('librarian', 'Библиотекарь'),
-    ]
-
-    role = forms.ChoiceField(choices=ROLE_CHOICES, widget=forms.RadioSelect)
-
     class Meta:
         model = User
         fields = ['username', 'password1', 'password2']
@@ -42,14 +35,9 @@ class RegistrationForm(UserCreationForm):
             'username': forms.TextInput(attrs={'placeholder': 'Логин'}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['role'].initial = 'client'
-
     def save(self, commit=True):
         user = super().save(commit=commit)
-        role = self.cleaned_data['role']
-        group, _ = Group.objects.get_or_create(name=role)
-        user.groups.clear()
-        user.groups.add(group)
+        if commit:
+            group, _ = Group.objects.get_or_create(name='client')
+            user.groups.add(group)
         return user
