@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Avg
+from django.conf import settings
 from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator
 
 
@@ -41,6 +42,13 @@ class Film(models.Model):
 
 class Review(models.Model):
     film = models.ForeignKey(Film, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='film_reviews',
+    )
     author = models.CharField(max_length=80)
     rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
     text = models.TextField()
@@ -48,6 +56,9 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(fields=['film', 'user'], name='unique_review_per_film_user'),
+        ]
 
     def __str__(self):
         return f'{self.author} - {self.film.title}'

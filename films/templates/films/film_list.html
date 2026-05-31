@@ -1,12 +1,13 @@
 {% extends 'films/base.html' %}
+{% load static %}
 
 {% block title %}Каталог фильмов{% endblock %}
 
 {% block content %}
 <section class="hero">
   <div>
-    <h1>Каталог фильмов с видео, жанрами и отзывами</h1>
-    <p class="hero-text">Добавляйте фильмы, загружайте видеофайлы и собирайте оценки зрителей в одном месте.</p>
+    <h1>Каталог фильмов</h1>
+    <p class="hero-text">Смотрите фильмы и обменивайтесь отзывами.</p>
   </div>
   <form class="search-bar" method="get">
     <input type="search" name="q" value="{{ query }}" placeholder="Поиск фильма">
@@ -17,6 +18,16 @@
 <section class="grid">
   {% for film in films %}
     <article class="card film-card">
+      <a class="film-preview" href="{% url 'film_detail' film.pk %}">
+        <img
+          class="film-preview-image"
+          data-video-preview
+          data-video-src="{{ film.video.url }}"
+          alt="Превью фильма {{ film.title }}"
+          loading="lazy"
+        >
+      </a>
+
       <div class="card-head">
         <div>
           <p class="meta">{{ film.created_at|date:"d.m.Y" }}</p>
@@ -54,4 +65,8 @@
     </div>
   {% endfor %}
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{% static 'films/previews.js' %}" defer></script>
 {% endblock %}

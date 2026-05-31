@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 from functools import wraps
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db.models import Avg, Count
@@ -56,18 +57,33 @@ def register_view(request):
 
 
 def film_detail(request, pk):
-    film = get_object_or_404(Film.objects.prefetch_related('genres', 'reviews'), pk=pk)
+    film = get_object_or_404(Film.objects.prefetch_related('genres', 'reviews__user'), pk=pk)
+    user_review = None
+    reviews = list(film.reviews.select_related('user').all())
+
+    if request.user.is_authenticated:
+        for review in reviews:
+            if review.user_id == request.user.id:
+                user_review = review
+                break
+        reviews.sort(key=lambda review: (review.user_id != request.user.id, -review.created_at.timestamp()))
+    else:
+        reviews.sort(key=lambda review: -review.created_at.timestamp())
 
     if request.method == 'POST':
         if not request.user.is_authenticated:
             return redirect(f'/accounts/login/?next=/film/{film.pk}/')
         form = ReviewForm(request.POST)
         if form.is_valid():
-            review = form.save(commit=False)
-            review.film = film
-            review.author = request.user.username
-            review.save()
-            return redirect('film_detail', pk=film.pk)
+            if user_review is not None:
+                form.add_error(None, 'У вас уже есть отзыв к этому фильму. Сначала удалите старый.')
+            else:
+                review = form.save(commit=False)
+                review.film = film
+                review.user = request.user
+                review.author = request.user.username
+                review.save()
+                return redirect('film_detail', pk=film.pk)
     else:
         form = ReviewForm()
 
@@ -77,8 +93,10 @@ def film_detail(request, pk):
         {
             'film': film,
             'review_form': form,
+            'reviews': reviews,
+            'user_review': user_review,
             'can_moderate_reviews': is_librarian(request.user),
-            'can_review': request.user.is_authenticated,
+            'can_review': request.user.is_authenticated and user_review is None,
         },
     )
 
@@ -96,11 +114,14 @@ def film_create(request):
     return render(request, 'films/film_form.html', {'form': form})
 
 
-@librarian_required
+@login_required
 def review_delete(request, pk):
     review = get_object_or_404(Review, pk=pk)
     film_pk = review.film_id
     if request.method == 'POST':
-        review.delete()
-        messages.success(request, 'Отзыв удалён.')
+        if request.user.is_authenticated and (is_librarian(request.user) or review.user_id == request.user.id):
+            review.delete()
+            messages.success(request, 'Отзыв удалён.')
+        else:
+            messages.error(request, 'Недостаточно прав.')
     return redirect('film_detail', pk=film_pk)

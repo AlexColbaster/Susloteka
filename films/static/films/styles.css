@@ -334,6 +334,22 @@ textarea { resize: vertical; }
   min-height: 240px;
 }
 
+.film-preview {
+  display: block;
+  margin: -20px -20px 16px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  background: #050805;
+}
+
+.film-preview-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #050805;
+  display: block;
+}
+
 .card-head,
 .card-footer,
 .detail-top,
