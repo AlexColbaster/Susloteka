@@ -1,0 +1,50 @@
+{% extends 'films/base.html' %}
+
+{% block title %}Добавить фильм{% endblock %}
+
+{% block content %}
+<section class="card form-card">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Новая запись</p>
+      <h1>Добавить фильм</h1>
+    </div>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="form-stack form-grid">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <label>
+      <span>Название</span>
+      {{ form.title }}
+      {{ form.title.errors }}
+    </label>
+
+    <label class="full-width">
+      <span>Описание</span>
+      {{ form.description }}
+      {{ form.description.errors }}
+    </label>
+
+    <label>
+      <span>Видеофайл</span>
+      {{ form.video }}
+      {{ form.video.errors }}
+    </label>
+
+    <fieldset class="full-width genre-fieldset">
+      <legend>Жанры</legend>
+      <div class="genre-grid">
+        {{ form.genres }}
+      </div>
+      {{ form.genres.errors }}
+    </fieldset>
+
+    <div class="full-width form-actions">
+      <button class="button button-primary" type="submit">Сохранить фильм</button>
+      <a class="button button-ghost" href="{% url 'film_list' %}">Отмена</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

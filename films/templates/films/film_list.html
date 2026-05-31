@@ -1,0 +1,58 @@
+{% extends 'films/base.html' %}
+
+{% block title %}Каталог фильмов{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">SQLite Django film library</p>
+    <h1>Каталог фильмов с видео, жанрами и отзывами</h1>
+    <p class="hero-text">Добавляйте фильмы, загружайте видеофайлы и собирайте оценки зрителей в одном месте.</p>
+  </div>
+  <form class="search-bar" method="get">
+    <input type="search" name="q" value="{{ query }}" placeholder="Поиск фильма">
+    <button class="button button-primary" type="submit">Найти</button>
+  </form>
+</section>
+
+<section class="grid">
+  {% for film in films %}
+    <article class="card film-card">
+      <div class="card-head">
+        <div>
+          <p class="meta">{{ film.created_at|date:"d.m.Y" }}</p>
+          <h2><a href="{% url 'film_detail' film.pk %}">{{ film.title }}</a></h2>
+        </div>
+        <div class="rating-pill">
+          {% if film.avg_rating %}
+            {{ film.avg_rating|floatformat:1 }} / 10
+          {% else %}
+            Нет оценок
+          {% endif %}
+        </div>
+      </div>
+
+      <p class="excerpt">{{ film.description|truncatechars:180 }}</p>
+
+      <div class="chip-list">
+        {% for genre in film.genres.all %}
+          <span class="chip">{{ genre.name }}</span>
+        {% empty %}
+          <span class="chip chip-muted">Без жанров</span>
+        {% endfor %}
+      </div>
+
+      <div class="card-footer">
+        <span>{{ film.reviews_total|default:0 }} отзывов</span>
+        <a class="button button-ghost" href="{% url 'film_detail' film.pk %}">Смотреть</a>
+      </div>
+    </article>
+  {% empty %}
+    <div class="empty-state card">
+      <h2>Фильмов пока нет</h2>
+      <p>Добавьте первый фильм, чтобы каталог ожил.</p>
+      <a class="button button-primary" href="{% url 'film_create' %}">Добавить фильм</a>
+    </div>
+  {% endfor %}
+</section>
+{% endblock %}

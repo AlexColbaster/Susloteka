@@ -1,0 +1,83 @@
+{% extends 'films/base.html' %}
+
+{% block title %}{{ film.title }}{% endblock %}
+
+{% block content %}
+<section class="detail-layout">
+  <article class="card detail-card">
+    <div class="detail-top">
+      <div>
+        <p class="eyebrow">Карточка фильма</p>
+        <h1>{{ film.title }}</h1>
+      </div>
+      <div class="rating-box">
+        <span class="rating-value">{% if film.average_rating %}{{ film.average_rating|floatformat:1 }}{% else %}0.0{% endif %}</span>
+        <span class="rating-label">средняя оценка</span>
+      </div>
+    </div>
+
+    <div class="chip-list">
+      {% for genre in film.genres.all %}
+        <span class="chip">{{ genre.name }}</span>
+      {% empty %}
+        <span class="chip chip-muted">Без жанров</span>
+      {% endfor %}
+    </div>
+
+    <p class="detail-text">{{ film.description }}</p>
+
+    <div class="video-frame">
+      <video controls preload="metadata">
+        <source src="{{ film.video.url }}">
+        Ваш браузер не поддерживает воспроизведение видео.
+      </video>
+    </div>
+  </article>
+
+  <aside class="card sidebar-card">
+    <h2>Оставить отзыв</h2>
+    <form method="post" class="form-stack">
+      {% csrf_token %}
+      {{ review_form.non_field_errors }}
+      <label>
+        <span>Имя</span>
+        {{ review_form.author }}
+        {{ review_form.author.errors }}
+      </label>
+      <label>
+        <span>Оценка 1-10</span>
+        {{ review_form.rating }}
+        {{ review_form.rating.errors }}
+      </label>
+      <label>
+        <span>Текст</span>
+        {{ review_form.text }}
+        {{ review_form.text.errors }}
+      </label>
+      <button class="button button-primary" type="submit">Отправить отзыв</button>
+    </form>
+  </aside>
+</section>
+
+<section class="card reviews-card">
+  <div class="section-head">
+    <h2>Отзывы</h2>
+    <span>{{ film.reviews.count }} шт.</span>
+  </div>
+
+  <div class="reviews-list">
+    {% for review in film.reviews.all %}
+      <article class="review-item">
+        <div class="review-meta">
+          <strong>{{ review.author }}</strong>
+          <span>{{ review.rating }}/10</span>
+        </div>
+        <p>{{ review.text }}</p>
+        <small>{{ review.created_at|date:"d.m.Y H:i" }}</small>
+      </article>
+    {% empty %}
+      <p class="empty-copy">Пока нет отзывов. Будьте первым.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
