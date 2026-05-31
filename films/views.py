@@ -1,6 +1,5 @@
 from django.contrib import messages
 from django.contrib.auth import login
-from django.contrib.auth.decorators import login_required
 from functools import wraps
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db.models import Avg, Count
@@ -54,11 +53,6 @@ def register_view(request):
         form = RegistrationForm()
 
     return render(request, 'registration/register.html', {'form': form})
-
-
-@login_required
-def profile_view(request):
-    return render(request, 'films/profile.html')
 
 
 def film_detail(request, pk):

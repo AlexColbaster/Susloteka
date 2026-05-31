@@ -9,7 +9,6 @@ urlpatterns = [
     path('film/<int:pk>/', views.film_detail, name='film_detail'),
     path('review/<int:pk>/delete/', views.review_delete, name='review_delete'),
     path('register/', views.register_view, name='register'),
-    path('profile/', views.profile_view, name='profile'),
     path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
 ]
