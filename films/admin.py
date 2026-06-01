@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group, User
 from django.urls import path, reverse
 
-from .models import Director, Film, Genre, Review
+from .models import Director, Film, Genre, Log, Review
 
 
 try:
@@ -15,7 +15,16 @@ except NotRegistered:
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
+    list_display = ['name', 'is_deleted']
+    list_filter = ['is_deleted']
     search_fields = ['name']
+
+    def get_queryset(self, request):
+        return Genre.all_objects.all()
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.delete()
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
@@ -61,6 +70,28 @@ class ReviewAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
         extra_context['export_url'] = reverse('export_table', args=['reviews'])
+        return super().changelist_view(request, extra_context=extra_context)
+
+
+@admin.register(Log)
+class LogAdmin(admin.ModelAdmin):
+    list_display = ['date', 'info']
+    search_fields = ['info']
+    readonly_fields = ['date', 'info']
+    ordering = ['-date']
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['export_url'] = reverse('export_table', args=['logs'])
         return super().changelist_view(request, extra_context=extra_context)
 
 

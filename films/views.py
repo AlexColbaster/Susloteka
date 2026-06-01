@@ -136,6 +136,7 @@ def export_table(request, table_name):
         'directors': ('films', 'Director'),
         'genres': ('films', 'Genre'),
         'reviews': ('films', 'Review'),
+        'logs': ('films', 'Log'),
     }
     if table_name not in allowed:
         raise Http404('Таблица не найдена')

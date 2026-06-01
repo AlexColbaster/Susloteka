@@ -5,8 +5,17 @@ from django.conf import settings
 from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator
 
 
+class ActiveGenreManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
 class Genre(models.Model):
     name = models.CharField(max_length=80, unique=True)
+    is_deleted = models.BooleanField(default=False)
+
+    objects = ActiveGenreManager()
+    all_objects = models.Manager()
 
     class Meta:
         ordering = ['name']
@@ -15,6 +24,13 @@ class Genre(models.Model):
 
     def __str__(self):
         return self.name
+
+    def delete(self, using=None, keep_parents=False):
+        if not self.is_deleted:
+            self.is_deleted = True
+            self.save(update_fields=['is_deleted'])
+            return
+        return super().delete(using=using, keep_parents=keep_parents)
 
 
 class Director(models.Model):
@@ -85,3 +101,17 @@ class Review(models.Model):
 
     def __str__(self):
         return f'{self.author} - {self.film.title}'
+
+
+class Log(models.Model):
+    date = models.DateTimeField(auto_now_add=True)
+    info = models.TextField()
+
+    class Meta:
+        db_table = 'logs'
+        ordering = ['-date']
+        verbose_name = 'лог'
+        verbose_name_plural = 'логи'
+
+    def __str__(self):
+        return f'{self.date:%Y-%m-%d %H:%M:%S} - {self.info}'
