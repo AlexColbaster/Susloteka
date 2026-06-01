@@ -25,6 +25,25 @@
       {% endfor %}
     </div>
 
+    <div class="director-list">
+      {% for director in film.directors.all %}
+        <article class="director-item">
+          <div class="director-head">
+            {% if director.link %}
+              <a class="button button-ghost" href="{{ director.link }}" target="_blank" rel="noopener noreferrer">{{ director.name }}</a>
+            {% else %}
+              <span class="chip">{{ director.name }}</span>
+            {% endif %}
+            {% if director.description %}
+              <p class="director-desc">{{ director.description }}</p>
+            {% endif %}
+          </div>
+        </article>
+      {% empty %}
+        <span class="chip chip-muted">Без режиссёров</span>
+      {% endfor %}
+    </div>
+
     <p class="detail-text">{{ film.description }}</p>
 
     <div class="video-frame video-player">

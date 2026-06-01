@@ -2,10 +2,16 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group, User
 
-from .models import Film, Review
+from .models import Director, Film, Review
 
 
 class FilmForm(forms.ModelForm):
+    director_names = forms.CharField(
+        label='Режиссёры',
+        required=False,
+        widget=forms.HiddenInput(),
+    )
+
     class Meta:
         model = Film
         fields = ['title', 'description', 'video', 'genres']
@@ -15,6 +21,41 @@ class FilmForm(forms.ModelForm):
             'video': forms.ClearableFileInput(),
             'genres': forms.CheckboxSelectMultiple(),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.directors = Director.objects.order_by('name')
+
+    def clean_director_names(self):
+        raw_value = self.cleaned_data.get('director_names', '').strip()
+        if not raw_value:
+            return []
+
+        names = [part.strip() for part in raw_value.split(',') if part.strip()]
+        if not names:
+            return []
+
+        directors = []
+        missing = []
+        for name in names:
+            director = Director.objects.filter(name__iexact=name).first()
+            if director is None:
+                missing.append(name)
+            elif director not in directors:
+                directors.append(director)
+
+        if missing:
+            raise forms.ValidationError(f"Не найдены режиссёры: {', '.join(missing)}")
+
+        return directors
+
+    def save(self, commit=True):
+        film = super().save(commit=False)
+        if commit:
+            film.save()
+            self.save_m2m()
+            film.directors.set(self.cleaned_data.get('director_names', []))
+        return film
 
 
 class ReviewForm(forms.ModelForm):

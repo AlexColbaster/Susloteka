@@ -1,4 +1,5 @@
 {% extends 'films/base.html' %}
+{% load static %}
 
 {% block title %}Добавить фильм{% endblock %}
 
@@ -24,6 +25,29 @@
       {{ form.title }}
       {{ form.title.errors }}
     </label>
+
+    <fieldset class="full-width director-fieldset">
+      <legend>{{ form.director_names.label }}</legend>
+      {{ form.director_names }}
+      <div class="director-input-row">
+        <input
+          type="text"
+          class="director-search"
+          placeholder="Введите имя и нажмите Enter"
+          data-director-input
+          list="directors-list"
+        >
+        <button class="button button-ghost director-add" type="button" data-director-add>Добавить</button>
+      </div>
+      <div class="director-tags" data-director-tags></div>
+      <datalist id="directors-list">
+        {% for director in directors %}
+          <option value="{{ director.name }}"></option>
+        {% endfor %}
+      </datalist>
+      <p class="director-hint">Добавляйте режиссёров по одному. Enter или кнопка добавят выбранного в список.</p>
+      {{ form.director_names.errors }}
+    </fieldset>
 
     <label class="full-width">
       <span>Описание</span>
@@ -51,4 +75,8 @@
     </div>
   </form>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{% static 'films/director_tags.js' %}" defer></script>
 {% endblock %}

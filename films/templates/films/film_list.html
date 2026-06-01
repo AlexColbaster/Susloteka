@@ -30,7 +30,6 @@
 
       <div class="card-head">
         <div>
-          <p class="meta">{{ film.created_at|date:"d.m.Y" }}</p>
           <h2><a href="{% url 'film_detail' film.pk %}">{{ film.title }}</a></h2>
         </div>
         <div class="rating-pill">
@@ -54,7 +53,6 @@
 
       <div class="card-footer">
         <span>{{ film.reviews_total|default:0 }} отзывов</span>
-        <a class="button button-ghost" href="{% url 'film_detail' film.pk %}">Смотреть</a>
       </div>
     </article>
   {% empty %}

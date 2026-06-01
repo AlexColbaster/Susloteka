@@ -4,9 +4,11 @@ from django.contrib.auth.decorators import login_required
 from functools import wraps
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db.models import Avg, Count
+from django.http import Http404
 
 from .forms import FilmForm, RegistrationForm, ReviewForm
 from .models import Film, Review
+from .xlsx_export import export_model_to_xlsx
 
 
 def is_librarian(user):
@@ -32,7 +34,7 @@ def librarian_required(view_func):
 
 def film_list(request):
     query = request.GET.get('q', '').strip()
-    films = Film.objects.prefetch_related('genres', 'reviews')
+    films = Film.objects.prefetch_related('directors', 'genres', 'reviews')
     if query:
         films = films.filter(title__icontains=query)
     films = films.annotate(avg_rating=Avg('reviews__rating'), reviews_total=Count('reviews'))
@@ -57,7 +59,7 @@ def register_view(request):
 
 
 def film_detail(request, pk):
-    film = get_object_or_404(Film.objects.prefetch_related('genres', 'reviews__user'), pk=pk)
+    film = get_object_or_404(Film.objects.prefetch_related('directors', 'genres', 'reviews__user'), pk=pk)
     user_review = None
     reviews = list(film.reviews.select_related('user').all())
 
@@ -111,7 +113,7 @@ def film_create(request):
     else:
         form = FilmForm()
 
-    return render(request, 'films/film_form.html', {'form': form})
+    return render(request, 'films/film_form.html', {'form': form, 'directors': form.directors})
 
 
 @login_required
@@ -125,3 +127,17 @@ def review_delete(request, pk):
         else:
             messages.error(request, 'Недостаточно прав.')
     return redirect('film_detail', pk=film_pk)
+
+
+@login_required
+def export_table(request, table_name):
+    allowed = {
+        'films': ('films', 'Film'),
+        'directors': ('films', 'Director'),
+        'genres': ('films', 'Genre'),
+        'reviews': ('films', 'Review'),
+    }
+    if table_name not in allowed:
+        raise Http404('Таблица не найдена')
+    app_label, model_name = allowed[table_name]
+    return export_model_to_xlsx(app_label, model_name)

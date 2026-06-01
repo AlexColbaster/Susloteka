@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Avg
+from django.db.models import Q
 from django.conf import settings
 from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator
 
@@ -9,6 +10,22 @@ class Genre(models.Model):
 
     class Meta:
         ordering = ['name']
+        verbose_name = 'жанр'
+        verbose_name_plural = 'жанры'
+
+    def __str__(self):
+        return self.name
+
+
+class Director(models.Model):
+    name = models.CharField('имя', max_length=120, unique=True)
+    description = models.TextField('описание', blank=True)
+    link = models.URLField('ссылка', blank=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'режиссёр'
+        verbose_name_plural = 'режиссёры'
 
     def __str__(self):
         return self.name
@@ -16,6 +33,7 @@ class Genre(models.Model):
 
 class Film(models.Model):
     title = models.CharField(max_length=200)
+    directors = models.ManyToManyField(Director, related_name='films', blank=True)
     description = models.TextField()
     video = models.FileField(
         upload_to='films/videos/',
@@ -26,6 +44,8 @@ class Film(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'фильм'
+        verbose_name_plural = 'фильмы'
 
     def __str__(self):
         return self.title
@@ -58,7 +78,10 @@ class Review(models.Model):
         ordering = ['-created_at']
         constraints = [
             models.UniqueConstraint(fields=['film', 'user'], name='unique_review_per_film_user'),
+            models.CheckConstraint(condition=Q(rating__gte=1, rating__lte=10), name='review_rating_1_10'),
         ]
+        verbose_name = 'отзыв'
+        verbose_name_plural = 'отзывы'
 
     def __str__(self):
         return f'{self.author} - {self.film.title}'
